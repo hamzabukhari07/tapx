@@ -1,0 +1,6 @@
+{
+  "name": "Google Review Link Generator",
+  "description": "Generate direct Google Review links using a Google Place ID.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
