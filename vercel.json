@@ -5,7 +5,6 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/scan/:id", "destination": "/api/scan/:id" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
