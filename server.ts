@@ -91,9 +91,15 @@ async function startServer() {
 
   app.put('/api/qr-links/:id', async (req, res) => {
     try {
-      const { destinationUrl, businessName } = req.body || {};
+      let { destinationUrl, businessName } = req.body || {};
+      if (destinationUrl !== undefined && destinationUrl !== null) {
+        destinationUrl = String(destinationUrl).trim();
+        if (destinationUrl && !/^https?:\/\//i.test(destinationUrl) && !destinationUrl.startsWith('/')) {
+          destinationUrl = 'https://' + destinationUrl;
+        }
+      }
       await upsertQrLink(req.params.id, { destinationUrl, businessName });
-      res.json({ success: true });
+      res.json({ success: true, destinationUrl });
     } catch (error) {
       console.error('Update link error:', error);
       res.status(500).json({ error: 'Failed to update QR link.' });

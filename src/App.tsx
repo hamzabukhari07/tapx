@@ -45,24 +45,30 @@ function SetupQr({ user }: { user: AdminUser }) {
     if (!url.trim() || !name.trim()) return;
     setSaving(true);
     setError('');
+
+    let formattedUrl = url.trim();
+    if (!/^https?:\/\//i.test(formattedUrl) && !formattedUrl.startsWith('/')) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+
     try {
       const response = await fetch(`/api/qr-links/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          destinationUrl: url.trim(),
+          destinationUrl: formattedUrl,
           businessName: name.trim()
         })
       });
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.success) {
         navigate('/');
       } else {
-        setError(data.error || 'Failed to save assignment.');
+        setError(data?.error || 'Failed to save assignment.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to save assignment.");
+      setError(err?.message || "Failed to save assignment.");
     } finally {
       setSaving(false);
     }

@@ -16,9 +16,25 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      const { destinationUrl, businessName } = req.body || {};
+      let body = req.body;
+      if (typeof body === 'string') {
+        try {
+          body = JSON.parse(body);
+        } catch {
+          // ignore
+        }
+      }
+      let { destinationUrl, businessName } = body || {};
+
+      if (destinationUrl !== undefined && destinationUrl !== null) {
+        destinationUrl = String(destinationUrl).trim();
+        if (destinationUrl && !/^https?:\/\//i.test(destinationUrl) && !destinationUrl.startsWith('/')) {
+          destinationUrl = 'https://' + destinationUrl;
+        }
+      }
+
       await upsertQrLink(id, { destinationUrl, businessName });
-      return res.json({ success: true });
+      return res.json({ success: true, destinationUrl });
     }
 
     if (req.method === 'DELETE') {

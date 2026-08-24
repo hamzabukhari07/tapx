@@ -48,6 +48,7 @@ export default function Dashboard({ user }: DashboardProps) {
   // Edit State
   const [editingLink, setEditingLink] = useState<QrLink | null>(null);
   const [editUrl, setEditUrl] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const fetchLinks = useCallback(async () => {
     try {
@@ -117,17 +118,17 @@ export default function Dashboard({ user }: DashboardProps) {
         })
       });
       
-      const data = await response.json();
-      if (response.ok && data.id) {
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.id) {
         setCurrentBusinessName('Unassigned QR Code');
         setDynamicLinkUrl(`${window.location.origin}/scan/${data.id}`);
         fetchLinks();
       } else {
-        alert('Failed to create dynamic QR code.');
+        alert(data?.error || 'Failed to create dynamic QR code.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to create dynamic QR code.');
+      alert(err?.message || 'Failed to create dynamic QR code.');
     } finally {
       setIsCreatingQr(false);
     }
@@ -161,24 +162,33 @@ export default function Dashboard({ user }: DashboardProps) {
     e.preventDefault();
     if (!editingLink || !editUrl.trim()) return;
 
+    let formattedUrl = editUrl.trim();
+    if (!/^https?:\/\//i.test(formattedUrl) && !formattedUrl.startsWith('/')) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+
+    setIsUpdating(true);
     try {
       const response = await fetch(`/api/qr-links/${editingLink.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          destinationUrl: editUrl.trim()
+          destinationUrl: formattedUrl
         })
       });
-      if (response.ok) {
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.success) {
         setEditingLink(null);
         setEditUrl('');
         fetchLinks();
       } else {
-        alert('Failed to update link. Please make sure it is a valid URL.');
+        alert(data?.error || 'Failed to update link. Please make sure the destination URL is valid.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update link', error);
-      alert('Failed to update link. Please make sure it is a valid URL.');
+      alert(error?.message || 'Failed to update link. Please check your network.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -194,14 +204,15 @@ export default function Dashboard({ user }: DashboardProps) {
           businessName: 'Unassigned QR Code'
         })
       });
-      if (response.ok) {
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.success) {
         fetchLinks();
       } else {
-        alert('Failed to unassign link.');
+        alert(data?.error || 'Failed to unassign link.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to unassign link', error);
-      alert('Failed to unassign link.');
+      alert(error?.message || 'Failed to unassign link.');
     }
   };
 
@@ -212,14 +223,15 @@ export default function Dashboard({ user }: DashboardProps) {
       const response = await fetch(`/api/qr-links/${id}`, {
         method: 'DELETE'
       });
-      if (response.ok) {
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.success) {
         fetchLinks();
       } else {
-        alert('Failed to delete link.');
+        alert(data?.error || 'Failed to delete link.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete link', error);
-      alert('Failed to delete link.');
+      alert(error?.message || 'Failed to delete link.');
     }
   };
 
@@ -511,7 +523,7 @@ export default function Dashboard({ user }: DashboardProps) {
                           <form onSubmit={handleUpdateLink} className="mt-4 pt-4 border-t border-slate-200">
                             <label className="block text-xs font-medium text-slate-700 mb-1.5">New Destination URL</label>
                             <input
-                              type="url"
+                              type="text"
                               value={editUrl}
                               onChange={(e) => setEditUrl(e.target.value)}
                               placeholder="https://..."
@@ -521,16 +533,18 @@ export default function Dashboard({ user }: DashboardProps) {
                             <div className="flex gap-2 justify-end">
                               <button 
                                 type="button" 
+                                disabled={isUpdating}
                                 onClick={() => setEditingLink(null)}
-                                className="text-sm px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium"
+                                className="text-sm px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50"
                               >
                                 Cancel
                               </button>
                               <button 
                                 type="submit"
-                                className="text-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2 font-medium"
+                                disabled={isUpdating}
+                                className="text-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-colors flex items-center gap-2 font-medium"
                               >
-                                <Save size={16} /> Save Changes
+                                {isUpdating ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Changes</>}
                               </button>
                             </div>
                           </form>
