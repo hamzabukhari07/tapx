@@ -48,6 +48,7 @@ export default function Dashboard({ user }: DashboardProps) {
   // Edit State
   const [editingLink, setEditingLink] = useState<QrLink | null>(null);
   const [editUrl, setEditUrl] = useState('');
+  const [editName, setEditName] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
   const fetchLinks = useCallback(async () => {
@@ -167,19 +168,31 @@ export default function Dashboard({ user }: DashboardProps) {
       formattedUrl = 'https://' + formattedUrl;
     }
 
+    let finalName = editName.trim();
+    if (!finalName || finalName === 'Unassigned QR Code') {
+      try {
+        const hostname = new URL(formattedUrl).hostname.replace(/^www\./, '');
+        finalName = hostname;
+      } catch {
+        finalName = 'Google Business';
+      }
+    }
+
     setIsUpdating(true);
     try {
       const response = await fetch(`/api/qr-links/${editingLink.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          destinationUrl: formattedUrl
+          destinationUrl: formattedUrl,
+          businessName: finalName
         })
       });
       const data = await response.json().catch(() => null);
       if (response.ok && data?.success) {
         setEditingLink(null);
         setEditUrl('');
+        setEditName('');
         fetchLinks();
       } else {
         alert(data?.error || 'Failed to update link. Please make sure the destination URL is valid.');
@@ -444,27 +457,52 @@ export default function Dashboard({ user }: DashboardProps) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {savedLinks.map(link => {
+                  {savedLinks.map((link, index) => {
                     const scanUrl = `${window.location.origin}/scan/${link.id}`;
                     const isEditing = editingLink?.id === link.id;
-                    const isUnassigned = !link.destinationUrl || link.businessName === 'Unassigned QR Code';
+                    const isUnassigned = !link.destinationUrl || !link.destinationUrl.trim();
+                    const cardNumber = String(index + 1).padStart(2, '0');
+
+                    let displayName = link.businessName;
+                    if (!displayName || displayName === 'Unassigned QR Code') {
+                      if (link.destinationUrl) {
+                        try {
+                          displayName = new URL(link.destinationUrl).hostname.replace(/^www\./, '');
+                        } catch {
+                          displayName = `QR Card #${cardNumber}`;
+                        }
+                      } else {
+                        displayName = `Unassigned QR Code`;
+                      }
+                    }
 
                     return (
-                      <div key={link.id} className="p-5 border border-slate-200 rounded-xl bg-slate-50 shadow-sm">
+                      <div key={link.id} className="p-5 border border-slate-200 rounded-xl bg-slate-50 shadow-sm hover:border-slate-300 transition-colors">
                         <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-2 pr-4">
-                            <div className={`font-semibold text-base truncate ${isUnassigned ? 'text-slate-500' : 'text-slate-800'}`}>
-                              {link.businessName}
+                          <div className="flex items-center gap-2.5 pr-4 flex-wrap">
+                            <span className="bg-blue-600 text-white font-mono text-xs font-bold px-2 py-0.5 rounded-md shadow-xs">
+                              #{cardNumber}
+                            </span>
+                            <div className={`font-semibold text-base truncate max-w-[220px] sm:max-w-xs md:max-w-md ${isUnassigned ? 'text-slate-500' : 'text-slate-900'}`}>
+                              {displayName}
                             </div>
-                            {isUnassigned && (
-                              <span className="bg-amber-100 text-amber-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                            {isUnassigned ? (
+                              <span className="bg-amber-100 text-amber-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap border border-amber-200">
                                 Needs Setup
+                              </span>
+                            ) : (
+                              <span className="bg-emerald-100 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap border border-emerald-200 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
                               </span>
                             )}
                           </div>
                           <div className="flex gap-1.5 shrink-0">
                             <button 
-                              onClick={() => { setEditingLink(link); setEditUrl(link.destinationUrl); }}
+                              onClick={() => { 
+                                setEditingLink(link); 
+                                setEditUrl(link.destinationUrl || ''); 
+                                setEditName(link.businessName === 'Unassigned QR Code' ? '' : link.businessName || ''); 
+                              }}
                               className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg"
                               title={isUnassigned ? "Setup destination" : "Edit destination"}
                             >
@@ -478,7 +516,7 @@ export default function Dashboard({ user }: DashboardProps) {
                               {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
                             </button>
                             <button 
-                              onClick={() => downloadQRCode(scanUrl, link.businessName, `qr-${link.id}`)}
+                              onClick={() => downloadQRCode(scanUrl, `${cardNumber}_${displayName}`, `qr-${link.id}`)}
                               className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg"
                               title="Download QR"
                             >
@@ -508,33 +546,56 @@ export default function Dashboard({ user }: DashboardProps) {
                             <QRCodeCanvas id={`qr-${link.id}`} value={scanUrl} size={110} level={"H"} />
                           </div>
                           <div className="flex-1 w-full min-w-0">
-                            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Permanent Scan Link</div>
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Permanent Scan Link</span>
+                              <span className="text-[10px] font-mono text-slate-400">ID: {link.id}</span>
+                            </div>
                             <div className="text-xs text-slate-700 font-mono break-all bg-slate-50 p-2 rounded border border-slate-100 mb-2 select-all">
                               {scanUrl}
                             </div>
                             <div className="text-xs text-slate-500 truncate">
                               <span className="font-medium text-slate-700">Destination: </span>
-                              {link.destinationUrl ? link.destinationUrl : <span className="text-amber-600 font-medium">Not configured yet</span>}
+                              {link.destinationUrl ? (
+                                <span className="font-mono text-slate-800 text-[11px]">{link.destinationUrl}</span>
+                              ) : (
+                                <span className="text-amber-600 font-medium">Not configured yet</span>
+                              )}
                             </div>
                           </div>
                         </div>
 
                         {isEditing ? (
-                          <form onSubmit={handleUpdateLink} className="mt-4 pt-4 border-t border-slate-200">
-                            <label className="block text-xs font-medium text-slate-700 mb-1.5">New Destination URL</label>
-                            <input
-                              type="text"
-                              value={editUrl}
-                              onChange={(e) => setEditUrl(e.target.value)}
-                              placeholder="https://..."
-                              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mb-3"
-                              required
-                            />
-                            <div className="flex gap-2 justify-end">
+                          <form onSubmit={handleUpdateLink} className="mt-4 pt-4 border-t border-slate-200 space-y-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                Card / Business Name (Optional)
+                              </label>
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                placeholder="e.g. Maaz Events, Google Review Card, Front Desk"
+                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                Destination URL (Where scan will redirect)
+                              </label>
+                              <input
+                                type="text"
+                                value={editUrl}
+                                onChange={(e) => setEditUrl(e.target.value)}
+                                placeholder="https://..."
+                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                required
+                              />
+                            </div>
+                            <div className="flex gap-2 justify-end pt-1">
                               <button 
                                 type="button" 
                                 disabled={isUpdating}
-                                onClick={() => setEditingLink(null)}
+                                onClick={() => { setEditingLink(null); setEditUrl(''); setEditName(''); }}
                                 className="text-sm px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50"
                               >
                                 Cancel
@@ -542,23 +603,23 @@ export default function Dashboard({ user }: DashboardProps) {
                               <button 
                                 type="submit"
                                 disabled={isUpdating}
-                                className="text-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-colors flex items-center gap-2 font-medium"
+                                className="text-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-colors flex items-center gap-2 font-medium shadow-xs"
                               >
                                 {isUpdating ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Changes</>}
                               </button>
                             </div>
                           </form>
                         ) : (
-                          <div className={`mt-3 pt-3 border-t border-slate-200 text-xs truncate flex items-center gap-1.5 ${isUnassigned ? 'text-amber-600' : 'text-slate-500'}`}>
+                          <div className={`mt-3 pt-3 border-t border-slate-200 text-xs truncate flex items-center gap-1.5 ${isUnassigned ? 'text-amber-600' : 'text-emerald-700 font-medium'}`}>
                             {isUnassigned ? (
                               <>
-                                <PlusCircle size={12} className="shrink-0" />
-                                Please click the edit icon above to set a destination.
+                                <PlusCircle size={13} className="shrink-0 text-amber-500" />
+                                Please click the edit icon above to set a destination URL.
                               </>
                             ) : (
                               <>
-                                <LinkIcon size={12} className="shrink-0" /> 
-                                Redirects to: {link.destinationUrl}
+                                <Check size={13} className="shrink-0 text-emerald-600" /> 
+                                <span>Redirects to: <strong className="text-slate-800 font-mono text-[11px] underline underline-offset-2">{link.destinationUrl}</strong></span>
                               </>
                             )}
                           </div>
