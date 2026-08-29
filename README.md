@@ -7,7 +7,10 @@ Admins create QR codes, assign each one a destination (e.g. your Google review l
 ## Features
 
 - **Dynamic QR codes** — every code has a stable ID and a server-side destination, so you can update where it points without reprinting.
+- **Bulk generation** — generate as many QR codes as you need at once (up to 500 per batch) with a single click.
+- **Permanent sequence numbers** — every QR code gets a fixed, unique sequence number (`#0`, `#1`, `#2`, …) that never changes, even after other codes are deleted.
 - **Admin dashboard** — log in, view all QR codes, create new ones, and edit their destination/business name.
+- **Active / Non-Active filters** — a status tab in the management panel tells you at a glance which QR codes are live (destination assigned) and which still need setup.
 - **Scan redirection** — visitors who scan a code hit `/scan/:id` and are securely redirected to the assigned destination.
 - **Link extraction** — paste a Google Maps / business URL and the API resolves a clean review link without requiring any API keys.
 - **Safe redirects** — destination URLs are validated before redirecting to prevent open-redirect abuse.
@@ -27,6 +30,7 @@ Admins create QR codes, assign each one a destination (e.g. your Google review l
 ├── api/                      # Vercel serverless functions
 │   ├── _lib/                 # Shared server logic (db, link extraction, scan page)
 │   ├── admin-login.js
+│   ├── bulk-generate.js      # POST — create many QR codes in one request
 │   ├── extract-link.js
 │   ├── qr-links.js           # GET list / POST create
 │   ├── qr-links/[id].js      # GET / PUT / DELETE single link
@@ -77,7 +81,10 @@ cp .env.example .env
 
 ### 3. Set up the database
 
-Run the SQL in [`supabase/migrations/0001_create_qr_links.sql`](supabase/migrations/0001_create_qr_links.sql) in the **Supabase Dashboard → SQL Editor**. This creates the `qr_links` table, enables Row Level Security (with no public policies), and seeds a couple of sample codes.
+Run the SQL migration files in **Supabase Dashboard → SQL Editor**, in order:
+
+1. [`supabase/migrations/0001_create_qr_links.sql`](supabase/migrations/0001_create_qr_links.sql) — creates the `qr_links` table, enables Row Level Security (with no public policies), and seeds a couple of sample codes.
+2. [`supabase/migrations/0002_add_sequence_number.sql`](supabase/migrations/0002_add_sequence_number.sql) — adds the `sequence_number` column used for permanent, non-repeating numbering of QR codes.
 
 ### 4. Run the dev server
 
@@ -108,10 +115,11 @@ The `api/` functions run as serverless endpoints in production, replacing the lo
 
 ## How It Works
 
-1. **Create a QR code** — In the admin dashboard, a new link gets a stable ID like `qr_<random>`.
+1. **Create QR codes** — In the admin dashboard, create a single dynamic QR (stable ID like `qr_<random>`) or use **Bulk Generate** to create many at once. Every code gets a permanent `sequence_number` starting where the last one left off, so numbering never repeats.
 2. **Point a scanner at it** — Generate a QR encoding `https://<your-app>/scan/qr_<random>`.
 3. **Resolve on scan** — When someone scans, `/scan/:id` looks up the destination in Supabase, validates it, and redirects them there.
-4. **Update anytime** — Change the destination in the dashboard; the printed QR never needs to change.
+4. **Manage status** — In the management panel, filter by **Active** (destination assigned) or **Non-Active** (needs setup). Codes without a destination redirect to a setup page when scanned.
+5. **Update anytime** — Change the destination in the dashboard; the printed QR never needs to change, and its sequence number stays the same.
 
 ## Security Notes
 
