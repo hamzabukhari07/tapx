@@ -4,9 +4,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Copy, Check, MapPin, Link as LinkIcon, Loader2, QrCode, Download, Save, List, Edit2, Trash2, PlusCircle, Layers } from 'lucide-react';
+import { Copy, Check, MapPin, Link as LinkIcon, Loader2, QrCode, Download, Save, List, Edit2, Trash2, PlusCircle, Layers, FolderDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeCanvas } from 'qrcode.react';
+import QRCode from 'qrcode';
+import JSZip from 'jszip';
 
 interface AdminUser {
   uid: string;
@@ -48,6 +50,10 @@ export default function Dashboard({ user }: DashboardProps) {
   const [bulkResults, setBulkResults] = useState<QrLink[]>([]);
   const [bulkError, setBulkError] = useState('');
   const [bulkCopiedId, setBulkCopiedId] = useState('');
+
+  // Bulk Download ZIP State
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [zipProgress, setZipProgress] = useState('');
 
   // Saved Links State
   const [savedLinks, setSavedLinks] = useState<QrLink[]>([]);
@@ -201,6 +207,73 @@ export default function Dashboard({ user }: DashboardProps) {
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
+    }
+  };
+
+  const handleDownloadZip = async (linksToDownload: QrLink[], zipName = 'TapX_QR_Codes.zip') => {
+    if (!linksToDownload || linksToDownload.length === 0) return;
+    setIsDownloadingZip(true);
+    setZipProgress(`0/${linksToDownload.length}`);
+
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder('TapX_QR_Codes') || zip;
+
+      for (let i = 0; i < linksToDownload.length; i++) {
+        const link = linksToDownload[i];
+        const cardSeq = (link.sequenceNumber !== undefined && link.sequenceNumber !== null)
+          ? link.sequenceNumber
+          : savedLinks.findIndex((l) => l.id === link.id);
+        const seqStr = String(cardSeq >= 0 ? cardSeq : i).padStart(2, '0');
+
+        let name = link.businessName || 'Unassigned';
+        if (!name || name === 'Unassigned QR Code') {
+          if (link.destinationUrl) {
+            try {
+              name = new URL(link.destinationUrl).hostname.replace(/^www\./, '');
+            } catch {
+              name = 'QR_Card';
+            }
+          } else {
+            name = 'Unassigned';
+          }
+        }
+
+        const cleanName = name.replace(/[\/\\?%*:|"<>]/g, '').replace(/\s+/g, '_').substring(0, 30);
+        const filename = `#${seqStr}_${cleanName}.png`;
+        const scanUrl = `${window.location.origin}/scan/${link.id}`;
+
+        const dataUrl = await QRCode.toDataURL(scanUrl, {
+          width: 600,
+          margin: 2,
+          errorCorrectionLevel: 'H',
+          color: {
+            dark: '#0f172a',
+            light: '#ffffff'
+          }
+        });
+
+        const base64Data = dataUrl.split(',')[1];
+        folder.file(filename, base64Data, { base64: true });
+
+        setZipProgress(`${i + 1}/${linksToDownload.length}`);
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const downloadUrl = URL.createObjectURL(content);
+      const linkEl = document.createElement('a');
+      linkEl.href = downloadUrl;
+      linkEl.download = zipName.endsWith('.zip') ? zipName : `${zipName}.zip`;
+      document.body.appendChild(linkEl);
+      linkEl.click();
+      document.body.removeChild(linkEl);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Failed to download ZIP:', error);
+      alert('Failed to generate ZIP archive.');
+    } finally {
+      setIsDownloadingZip(false);
+      setZipProgress('');
     }
   };
 
@@ -554,11 +627,35 @@ export default function Dashboard({ user }: DashboardProps) {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-100"
                   >
-                    <div className="bg-emerald-50 text-emerald-700 p-3.5 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm font-medium border border-emerald-100 flex gap-2">
-                      <Check size={18} className="shrink-0 mt-0.5" />
-                      <div>
-                        Generated {bulkResults.length} QR codes with sequence numbers #{String(bulkResults[0]?.sequenceNumber).padStart(2, '0')} &ndash; #{String(bulkResults[bulkResults.length - 1]?.sequenceNumber).padStart(2, '0')}.
+                    <div className="bg-emerald-50 text-emerald-700 p-3.5 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm font-medium border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex gap-2 items-start sm:items-center">
+                        <Check size={18} className="shrink-0 mt-0.5 sm:mt-0" />
+                        <div>
+                          Generated {bulkResults.length} QR codes with sequence numbers #{String(bulkResults[0]?.sequenceNumber).padStart(2, '0')} &ndash; #{String(bulkResults[bulkResults.length - 1]?.sequenceNumber).padStart(2, '0')}.
+                        </div>
                       </div>
+                      <button
+                        onClick={() => {
+                          const first = String(bulkResults[0]?.sequenceNumber ?? 0).padStart(2, '0');
+                          const last = String(bulkResults[bulkResults.length - 1]?.sequenceNumber ?? 0).padStart(2, '0');
+                          handleDownloadZip(bulkResults, `TapX_Batch_${first}-${last}.zip`);
+                        }}
+                        disabled={isDownloadingZip}
+                        className="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                        title="Download all generated QR codes in this batch as a ZIP file"
+                      >
+                        {isDownloadingZip ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            <span>Downloading {zipProgress}...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FolderDown size={15} />
+                            <span>Download Batch (ZIP)</span>
+                          </>
+                        )}
+                      </button>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
@@ -602,10 +699,39 @@ export default function Dashboard({ user }: DashboardProps) {
             className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
           >
             <div className="p-3.5 sm:p-6 md:p-8">
-              <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 mb-3 sm:mb-4">
                 <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
                   <List size={20} className="text-slate-400" /> My Links
                 </h2>
+                {savedLinks.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const filtered = savedLinks.filter((link) => {
+                        const hasDest = !!link.destinationUrl && !!link.destinationUrl.trim();
+                        if (manageTab === 'active') return hasDest;
+                        if (manageTab === 'inactive') return !hasDest;
+                        return true;
+                      });
+                      const tabName = manageTab === 'all' ? 'All' : manageTab === 'active' ? 'Active' : 'Pending';
+                      handleDownloadZip(filtered, `TapX_${tabName}_QRCodes.zip`);
+                    }}
+                    disabled={isDownloadingZip}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer active:scale-95 self-start sm:self-auto"
+                    title="Download all displayed QR codes in a ZIP file"
+                  >
+                    {isDownloadingZip ? (
+                      <>
+                        <Loader2 size={13} className="animate-spin" />
+                        <span>Downloading {zipProgress}...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FolderDown size={14} />
+                        <span>Download {manageTab === 'all' ? 'All' : manageTab === 'active' ? 'Active' : 'Pending'} (ZIP)</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl mb-4 sm:mb-6">
