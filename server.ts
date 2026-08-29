@@ -162,7 +162,12 @@ async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        watch: {
+          ignored: ['**/images/**', '**/public/**', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.ico', '**/.git/**', '**/dist/**', '**/supabase/**'],
+        },
+      },
       appType: 'spa'
     });
     app.use(vite.middlewares);

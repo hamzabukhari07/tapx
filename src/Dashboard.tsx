@@ -294,33 +294,36 @@ export default function Dashboard({ user }: DashboardProps) {
   };
 
   return (
-    <div className="min-h-[calc(100vh-53px)] bg-slate-50 flex flex-col items-center py-8 px-4 text-slate-900 font-sans">
+    <div className="min-h-[calc(100vh-53px)] bg-slate-50 flex flex-col items-center py-4 sm:py-8 px-2.5 sm:px-4 text-slate-900 font-sans overflow-x-hidden">
       
-      {/* Tabs */}
-      <div className="w-full max-w-xl flex p-1 bg-slate-200 rounded-lg mb-8">
+      {/* Main Navigation Tabs */}
+      <div className="w-full max-w-xl grid grid-cols-3 p-1 bg-slate-200/80 rounded-xl mb-4 sm:mb-6 shadow-inner gap-1">
         <button
           onClick={() => setActiveTab('review')}
-          className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'review' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          className={`py-2 sm:py-2.5 px-1.5 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-2 cursor-pointer ${
+            activeTab === 'review' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <MapPin size={16} /> Review Link
+          <MapPin size={15} className="shrink-0" />
+          <span className="truncate">Review Link</span>
         </button>
         <button
           onClick={() => setActiveTab('generate')}
-          className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'generate' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          className={`py-2 sm:py-2.5 px-1.5 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-2 cursor-pointer ${
+            activeTab === 'generate' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <QrCode size={16} /> Dynamic QR
+          <QrCode size={15} className="shrink-0" />
+          <span className="truncate">Dynamic QR</span>
         </button>
         <button
           onClick={() => setActiveTab('manage')}
-          className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'manage' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          className={`py-2 sm:py-2.5 px-1.5 sm:px-3 text-xs sm:text-sm font-semibold rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-2 cursor-pointer ${
+            activeTab === 'manage' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
-          <List size={16} /> Manage Links
+          <List size={15} className="shrink-0" />
+          <span className="truncate">Manage</span>
         </button>
       </div>
 
@@ -332,20 +335,20 @@ export default function Dashboard({ user }: DashboardProps) {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
           >
-            <div className="p-6 md:p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                  <MapPin size={24} />
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-5 sm:mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                  <MapPin size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">Extract Review Link</h2>
-                  <p className="text-slate-500 text-sm">Paste a Google Maps link to get the direct review URL.</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-800">Extract Review Link</h2>
+                  <p className="text-slate-500 text-xs sm:text-sm">Paste a Google Maps link to get the direct review URL.</p>
                 </div>
               </div>
 
-              <form onSubmit={handleExtractReviewLink} className="space-y-5">
+              <form onSubmit={handleExtractReviewLink} className="space-y-4 sm:space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
                     Google Maps Link
                   </label>
                   <div className="relative">
@@ -354,10 +357,10 @@ export default function Dashboard({ user }: DashboardProps) {
                       value={mapLink}
                       onChange={(e) => setMapLink(e.target.value)}
                       placeholder="https://maps.app.goo.gl/..."
-                      className="w-full px-4 py-3 pl-10 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                      className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 pl-9 sm:pl-10 text-base sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-slate-50 focus:bg-white"
                       required
                     />
-                    <LinkIcon size={18} className="absolute left-3 top-3.5 text-slate-400" />
+                    <LinkIcon size={16} className="absolute left-3 top-3.5 text-slate-400" />
                   </div>
                   {extractError && (
                     <p className="text-red-500 text-xs mt-2">{extractError}</p>
@@ -367,7 +370,7 @@ export default function Dashboard({ user }: DashboardProps) {
                 <button
                   type="submit"
                   disabled={isExtracting || !mapLink}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 sm:py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer shadow-sm active:scale-[0.98]"
                 >
                   {isExtracting ? <><Loader2 size={18} className="animate-spin" /> Extracting...</> : 'Extract Link'}
                 </button>
@@ -378,22 +381,22 @@ export default function Dashboard({ user }: DashboardProps) {
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="mt-8 pt-8 border-t border-slate-100 overflow-hidden"
+                    className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-100 overflow-hidden"
                   >
-                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                      <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+                    <div className="bg-slate-50 rounded-xl p-3.5 sm:p-4 border border-slate-200">
+                      <div className="text-[11px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
                         Review Link {extractedBusinessName ? `for ${extractedBusinessName.split(',')[0]}` : ''}
                       </div>
-                      <div className="flex gap-2">
-                        <div className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                      <div className="flex gap-2 items-center">
+                        <div className="flex-1 min-w-0 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs sm:text-sm font-mono text-slate-700 overflow-x-auto whitespace-nowrap scrollbar-hide select-all">
                           {generatedReviewLink}
                         </div>
                         <button
                           onClick={() => handleCopy(generatedReviewLink)}
-                          className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${
+                          className={`flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-lg transition-colors cursor-pointer ${
                             copied 
                               ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
-                              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 active:scale-95'
                           }`}
                           title="Copy to clipboard"
                         >
@@ -415,27 +418,27 @@ export default function Dashboard({ user }: DashboardProps) {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
           >
-            <div className="p-6 md:p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                  <QrCode size={24} />
+            <div className="p-4 sm:p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-5 sm:mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                  <QrCode size={20} className="sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">New Dynamic QR</h2>
-                  <p className="text-slate-500 text-sm">Create an updateable QR code for any URL.</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-800">New Dynamic QR</h2>
+                  <p className="text-slate-500 text-xs sm:text-sm">Create an updateable QR code for any URL.</p>
                 </div>
               </div>
 
-              <form onSubmit={handleCreateDynamicQr} className="space-y-5">
+              <form onSubmit={handleCreateDynamicQr} className="space-y-4">
                 <button
                   type="submit"
                   disabled={isCreatingQr}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-4 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-lg shadow-sm"
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-3.5 sm:py-4 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-base sm:text-lg shadow-sm cursor-pointer active:scale-[0.98]"
                 >
-                  {isCreatingQr ? <><Loader2 size={24} className="animate-spin" /> Creating...</> : <><PlusCircle size={24} /> Create Blank Printable QR Code</>}
+                  {isCreatingQr ? <><Loader2 size={20} className="animate-spin" /> Creating...</> : <><PlusCircle size={20} className="sm:w-6 sm:h-6" /> Create Blank QR Code</>}
                 </button>
-                <p className="text-slate-500 text-sm text-center">
-                  Once generated, you can print the QR code immediately. Scan it with your mobile phone to attach a destination URL.
+                <p className="text-slate-500 text-xs sm:text-sm text-center">
+                  Once generated, you can print the QR code immediately. Scan it anytime to attach or update its destination URL.
                 </p>
               </form>
 
@@ -444,72 +447,73 @@ export default function Dashboard({ user }: DashboardProps) {
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="mt-8 pt-8 border-t border-slate-100"
+                    className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-100"
                   >
-                    <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl mb-6 text-sm font-medium border border-emerald-100 flex gap-2">
-                      <Check size={20} className="shrink-0 mt-0.5" />
+                    <div className="bg-emerald-50 text-emerald-700 p-3.5 sm:p-4 rounded-xl mb-5 sm:mb-6 text-xs sm:text-sm font-medium border border-emerald-100 flex gap-2">
+                      <Check size={18} className="shrink-0 mt-0.5" />
                       <div>
                         QR code successfully created! It is saved to your account and ready to print.
                       </div>
                     </div>
                     
                     <div className="flex flex-col items-center">
-                      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4">
+                      <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs mb-4">
                         <QRCodeCanvas
                           id="new-qr"
                           value={dynamicLinkUrl}
-                          size={200}
+                          size={160}
                           bgColor={"#ffffff"}
                           fgColor={"#0f172a"}
                           level={"H"}
+                          className="w-40 h-40 sm:w-48 sm:h-48"
                         />
                       </div>
                       <button
                         onClick={() => downloadQRCode(dynamicLinkUrl, currentBusinessName, 'new-qr')}
-                        className="w-full max-w-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
+                        className="w-full max-w-xs bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 sm:py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer shadow-sm active:scale-[0.98]"
                       >
-                        <Download size={18} /> Download QR Code
+                        <Download size={16} /> Download QR Code
                       </button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="my-8 flex items-center gap-3">
+              <div className="my-6 sm:my-8 flex items-center gap-3">
                 <div className="flex-1 h-px bg-slate-200"></div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bulk Generate</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">Bulk Generate</span>
                 <div className="flex-1 h-px bg-slate-200"></div>
               </div>
 
-              <form onSubmit={handleBulkGenerate} className="space-y-5">
-                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
-                      <Layers size={20} />
+              <form onSubmit={handleBulkGenerate} className="space-y-4 sm:space-y-5">
+                <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-3.5 sm:p-4">
+                  <div className="flex items-start gap-2.5 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                      <Layers size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-800">Generate Multiple QR Codes</h3>
-                      <p className="text-slate-500 text-sm mt-0.5">
-                        Enter how many QR codes you need. Each one gets a permanent sequence number (0, 1, 2, &hellip;) that never changes.
+                      <h3 className="font-bold text-slate-800 text-sm sm:text-base">Generate Multiple QR Codes</h3>
+                      <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+                        Enter how many QR codes you need. Each one gets a permanent sequence number (#00, #01, #02...) that never changes.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">
                     How many QR codes to generate?
                   </label>
-                  <div className="flex gap-2">
-                    <div className="flex gap-2 flex-1">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="grid grid-cols-4 gap-1.5 flex-1">
                       {[5, 10, 20, 50].map((n) => (
                         <button
                           key={n}
                           type="button"
                           onClick={() => setBulkCount(String(n))}
-                          className={`flex-1 py-2.5 text-sm font-semibold rounded-lg border transition-colors ${
+                          className={`py-2 sm:py-2.5 text-xs sm:text-sm font-semibold rounded-lg border transition-all cursor-pointer ${
                             bulkCount === String(n)
-                              ? 'bg-blue-600 text-white border-blue-600'
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                               : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600'
                           }`}
                         >
@@ -517,15 +521,17 @@ export default function Dashboard({ user }: DashboardProps) {
                         </button>
                       ))}
                     </div>
-                    <input
-                      type="number"
-                      min={1}
-                      max={500}
-                      value={bulkCount}
-                      onChange={(e) => setBulkCount(e.target.value)}
-                      placeholder="N"
-                      className="w-20 px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-center font-semibold"
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        max={500}
+                        value={bulkCount}
+                        onChange={(e) => setBulkCount(e.target.value)}
+                        placeholder="Custom N"
+                        className="w-full sm:w-28 px-3 py-2 text-base sm:text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-center font-semibold bg-slate-50 focus:bg-white"
+                      />
+                    </div>
                   </div>
                   {bulkError && (
                     <p className="text-red-500 text-xs mt-2">{bulkError}</p>
@@ -535,9 +541,9 @@ export default function Dashboard({ user }: DashboardProps) {
                 <button
                   type="submit"
                   disabled={isBulkCreating || !bulkCount}
-                  className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-bold py-3 sm:py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer text-sm sm:text-base active:scale-[0.98]"
                 >
-                  {isBulkCreating ? <><Loader2 size={20} className="animate-spin" /> Generating...</> : <><Layers size={20} /> Generate {bulkCount ? `${bulkCount} QR Codes` : 'QR Codes'}</>}
+                  {isBulkCreating ? <><Loader2 size={18} className="animate-spin" /> Generating...</> : <><Layers size={18} /> Generate {bulkCount ? `${bulkCount} QR Codes` : 'QR Codes'}</>}
                 </button>
               </form>
 
@@ -546,34 +552,34 @@ export default function Dashboard({ user }: DashboardProps) {
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="mt-8 pt-8 border-t border-slate-100"
+                    className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-100"
                   >
-                    <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl mb-6 text-sm font-medium border border-emerald-100 flex gap-2">
-                      <Check size={20} className="shrink-0 mt-0.5" />
+                    <div className="bg-emerald-50 text-emerald-700 p-3.5 sm:p-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm font-medium border border-emerald-100 flex gap-2">
+                      <Check size={18} className="shrink-0 mt-0.5" />
                       <div>
-                        Successfully generated {bulkResults.length} QR codes with sequence numbers #{bulkResults[0]?.sequenceNumber} &ndash; #{bulkResults[bulkResults.length - 1]?.sequenceNumber}. Find them in the Manage Links tab.
+                        Generated {bulkResults.length} QR codes with sequence numbers #{String(bulkResults[0]?.sequenceNumber).padStart(2, '0')} &ndash; #{String(bulkResults[bulkResults.length - 1]?.sequenceNumber).padStart(2, '0')}.
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
                       {bulkResults.map((link) => {
                         const scanUrl = `${window.location.origin}/scan/${link.id}`;
                         const seq = link.sequenceNumber;
                         const seqLabel = String(seq).padStart(2, '0');
                         return (
-                          <div key={link.id} className="border border-slate-200 rounded-xl p-3 bg-slate-50 flex flex-col items-center gap-2">
-                            <span className="bg-slate-900 text-white font-mono text-xs font-bold px-2 py-0.5 rounded-md w-full text-center">
+                          <div key={link.id} className="border border-slate-200 rounded-xl p-2.5 sm:p-3 bg-slate-50 flex flex-col items-center gap-1.5 sm:gap-2">
+                            <span className="bg-blue-600 text-white font-mono text-[11px] sm:text-xs font-bold px-2 py-0.5 rounded-md w-full text-center shadow-2xs">
                               #{seqLabel}
                             </span>
-                            <div className="bg-white p-2 rounded-lg border border-slate-100">
-                              <QRCodeCanvas id={`bulk-qr-${link.id}`} value={scanUrl} size={90} level={"H"} />
+                            <div className="bg-white p-1.5 sm:p-2 rounded-lg border border-slate-100">
+                              <QRCodeCanvas id={`bulk-qr-${link.id}`} value={scanUrl} size={80} level={"H"} className="w-20 h-20 sm:w-24 sm:h-24" />
                             </div>
-                            <span className="text-[10px] font-mono text-slate-400 truncate w-full text-center" title={scanUrl}>
+                            <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 truncate w-full text-center" title={scanUrl}>
                               {scanUrl}
                             </span>
                             <button
                               onClick={() => { handleCopy(scanUrl); setBulkCopiedId(link.id); }}
-                              className="w-full py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors flex items-center justify-center gap-1"
+                              className="w-full py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                             >
                               {bulkCopiedId === link.id ? <><Check size={12} className="text-emerald-500" /> Copied</> : <><Copy size={12} /> Copy</>}
                             </button>
@@ -595,39 +601,48 @@ export default function Dashboard({ user }: DashboardProps) {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
           >
-            <div className="p-6 md:p-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                  <List size={22} className="text-slate-400" /> My Links
+            <div className="p-3.5 sm:p-6 md:p-8">
+              <div className="flex justify-between items-center mb-3 sm:mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <List size={20} className="text-slate-400" /> My Links
                 </h2>
               </div>
 
-              <div className="flex gap-2 p-1 bg-slate-100 rounded-lg mb-6">
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl mb-4 sm:mb-6">
                 <button
                   onClick={() => setManageTab('all')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
-                    manageTab === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  className={`py-2 px-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
+                    manageTab === 'all' ? 'bg-white text-blue-600 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  All <span className="text-xs text-slate-400">{savedLinks.length}</span>
+                  <span>All</span>
+                  <span className={`text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold ${manageTab === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'}`}>
+                    {savedLinks.length}
+                  </span>
                 </button>
                 <button
                   onClick={() => setManageTab('active')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
-                    manageTab === 'active' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  className={`py-2 px-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
+                    manageTab === 'active' ? 'bg-emerald-600 text-white shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${manageTab === 'active' ? 'bg-white' : 'bg-emerald-500'}`}></span>
-                  Active <span className="text-xs opacity-70">{savedLinks.filter(l => l.destinationUrl && l.destinationUrl.trim()).length}</span>
+                  <span>Active</span>
+                  <span className={`text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold ${manageTab === 'active' ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                    {savedLinks.filter(l => l.destinationUrl && l.destinationUrl.trim()).length}
+                  </span>
                 </button>
                 <button
                   onClick={() => setManageTab('inactive')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
-                    manageTab === 'inactive' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  className={`py-2 px-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
+                    manageTab === 'inactive' ? 'bg-amber-500 text-white shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${manageTab === 'inactive' ? 'bg-white' : 'bg-amber-500'}`}></span>
-                  Non-Active <span className="text-xs opacity-70">{savedLinks.filter(l => !l.destinationUrl || !l.destinationUrl.trim()).length}</span>
+                  <span className="truncate">Pending</span>
+                  <span className={`text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full font-bold ${manageTab === 'inactive' ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                    {savedLinks.filter(l => !l.destinationUrl || !l.destinationUrl.trim()).length}
+                  </span>
                 </button>
               </div>
               
@@ -636,11 +651,11 @@ export default function Dashboard({ user }: DashboardProps) {
                   <Loader2 size={32} className="animate-spin text-slate-400" />
                 </div>
               ) : savedLinks.length === 0 ? (
-                <div className="py-12 text-center text-slate-500 text-sm bg-slate-50 rounded-xl border border-slate-100">
+                <div className="py-12 text-center text-slate-500 text-sm bg-slate-50 rounded-xl border border-slate-100 p-4">
                   You haven't created any dynamic QR codes yet.
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {(() => {
                     const filteredLinks = savedLinks.filter((link) => {
                       const hasDest = !!link.destinationUrl && !!link.destinationUrl.trim();
@@ -650,7 +665,7 @@ export default function Dashboard({ user }: DashboardProps) {
                     });
                     if (filteredLinks.length === 0) {
                       return (
-                        <div className="py-12 text-center text-slate-500 text-sm bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="py-10 text-center text-slate-500 text-xs sm:text-sm bg-slate-50 rounded-xl border border-slate-100 p-4">
                           {manageTab === 'active'
                             ? "No active QR codes yet. Assign a destination to activate them."
                             : manageTab === 'inactive'
@@ -670,174 +685,187 @@ export default function Dashboard({ user }: DashboardProps) {
                             : savedLinks.findIndex((l) => l.id === link.id);
                           const cardNumber = String(cardSeq >= 0 ? cardSeq : 0).padStart(2, '0');
 
-                    let displayName = link.businessName;
-                    if (!displayName || displayName === 'Unassigned QR Code') {
-                      if (link.destinationUrl) {
-                        try {
-                          displayName = new URL(link.destinationUrl).hostname.replace(/^www\./, '');
-                        } catch {
-                          displayName = `QR Card #${cardNumber}`;
-                        }
-                      } else {
-                        displayName = `Unassigned QR Code`;
-                      }
-                    }
+                          let displayName = link.businessName;
+                          if (!displayName || displayName === 'Unassigned QR Code') {
+                            if (link.destinationUrl) {
+                              try {
+                                displayName = new URL(link.destinationUrl).hostname.replace(/^www\./, '');
+                              } catch {
+                                displayName = `QR Card #${cardNumber}`;
+                              }
+                            } else {
+                              displayName = `Unassigned QR Code`;
+                            }
+                          }
 
-                    return (
-                      <div key={link.id} className="p-5 border border-slate-200 rounded-xl bg-slate-50 shadow-sm hover:border-slate-300 transition-colors">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-2.5 pr-4 flex-wrap">
-                            <span className="bg-blue-600 text-white font-mono text-xs font-bold px-2 py-0.5 rounded-md shadow-xs">
-                              #{cardNumber}
-                            </span>
-                            <div className={`font-semibold text-base truncate max-w-[220px] sm:max-w-xs md:max-w-md ${isUnassigned ? 'text-slate-500' : 'text-slate-900'}`}>
-                              {displayName}
-                            </div>
-                            {isUnassigned ? (
-                              <span className="bg-amber-100 text-amber-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap border border-amber-200">
-                                Needs Setup
-                              </span>
-                            ) : (
-                              <span className="bg-emerald-100 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap border border-emerald-200 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex gap-1.5 shrink-0">
-                            <button 
-                              onClick={() => { 
-                                setEditingLink(link); 
-                                setEditUrl(link.destinationUrl || ''); 
-                                setEditName(link.businessName === 'Unassigned QR Code' ? '' : link.businessName || ''); 
-                              }}
-                              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg"
-                              title={isUnassigned ? "Setup destination" : "Edit destination"}
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => handleCopy(scanUrl)}
-                              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg"
-                              title="Copy scan link"
-                            >
-                              {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
-                            </button>
-                            <button 
-                              onClick={() => downloadQRCode(scanUrl, `${cardNumber}_${displayName}`, `qr-${link.id}`)}
-                              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg"
-                              title="Download QR"
-                            >
-                              <Download size={16} />
-                            </button>
-                            {!isUnassigned && (
-                              <button 
-                                onClick={() => handleUnassignLink(link.id)}
-                                className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition-colors bg-white border border-slate-200 rounded-lg ml-2"
-                                title="Unassign URL (keep QR)"
-                              >
-                                <LinkIcon size={16} className="opacity-50 line-through" />
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleDeleteLink(link.id)}
-                              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors bg-white border border-slate-200 rounded-lg ml-1"
-                              title="Delete Link Permanently"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-slate-200 mb-3">
-                          <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 shrink-0">
-                            <QRCodeCanvas id={`qr-${link.id}`} value={scanUrl} size={110} level={"H"} />
-                          </div>
-                          <div className="flex-1 w-full min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Permanent Scan Link</span>
-                              <span className="text-[10px] font-mono text-slate-400">ID: {link.id}</span>
-                            </div>
-                            <div className="text-xs text-slate-700 font-mono break-all bg-slate-50 p-2 rounded border border-slate-100 mb-2 select-all">
-                              {scanUrl}
-                            </div>
-                            <div className="text-xs text-slate-500 truncate">
-                              <span className="font-medium text-slate-700">Destination: </span>
-                              {link.destinationUrl ? (
-                                <span className="font-mono text-slate-800 text-[11px]">{link.destinationUrl}</span>
+                          return (
+                            <div key={link.id} className="p-3.5 sm:p-5 border border-slate-200 rounded-xl sm:rounded-2xl bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all shadow-2xs">
+                              {/* Header row: Badge, Name, Status, and Action buttons */}
+                              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 mb-3">
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                  <span className="bg-blue-600 text-white font-mono text-xs font-bold px-2 py-0.5 rounded-md shadow-2xs shrink-0">
+                                    #{cardNumber}
+                                  </span>
+                                  <div className={`font-bold text-sm sm:text-base truncate max-w-[200px] sm:max-w-xs md:max-w-md ${isUnassigned ? 'text-slate-500' : 'text-slate-900'}`}>
+                                    {displayName}
+                                  </div>
+                                  {isUnassigned ? (
+                                    <span className="bg-amber-100 text-amber-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap border border-amber-200 shrink-0">
+                                      Needs Setup
+                                    </span>
+                                  ) : (
+                                    <span className="bg-emerald-100 text-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full whitespace-nowrap border border-emerald-200 flex items-center gap-1 shrink-0">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {/* Action Buttons Toolbar */}
+                                <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+                                  <button 
+                                    onClick={() => { 
+                                      setEditingLink(link); 
+                                      setEditUrl(link.destinationUrl || ''); 
+                                      setEditName(link.businessName === 'Unassigned QR Code' ? '' : link.businessName || ''); 
+                                    }}
+                                    className="p-1.5 sm:p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg cursor-pointer shadow-2xs"
+                                    title={isUnassigned ? "Setup destination" : "Edit destination"}
+                                  >
+                                    <Edit2 size={15} />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleCopy(scanUrl)}
+                                    className="p-1.5 sm:p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg cursor-pointer shadow-2xs"
+                                    title="Copy scan link"
+                                  >
+                                    {copied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+                                  </button>
+                                  <button 
+                                    onClick={() => downloadQRCode(scanUrl, `${cardNumber}_${displayName}`, `qr-${link.id}`)}
+                                    className="p-1.5 sm:p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors bg-white border border-slate-200 rounded-lg cursor-pointer shadow-2xs"
+                                    title="Download QR"
+                                  >
+                                    <Download size={15} />
+                                  </button>
+                                  {!isUnassigned && (
+                                    <button 
+                                      onClick={() => handleUnassignLink(link.id)}
+                                      className="p-1.5 sm:p-2 text-slate-600 hover:text-amber-600 hover:bg-amber-50 transition-colors bg-white border border-slate-200 rounded-lg cursor-pointer shadow-2xs"
+                                      title="Unassign URL (keep QR)"
+                                    >
+                                      <LinkIcon size={15} className="opacity-60 line-through" />
+                                    </button>
+                                  )}
+                                  <button 
+                                    onClick={() => handleDeleteLink(link.id)}
+                                    className="p-1.5 sm:p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors bg-white border border-slate-200 rounded-lg cursor-pointer shadow-2xs"
+                                    title="Delete Link Permanently"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              {/* QR Preview & Link Details */}
+                              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center sm:items-stretch bg-white p-3 sm:p-4 rounded-xl border border-slate-200/90 mb-2.5">
+                                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 shrink-0 flex items-center justify-center">
+                                  <QRCodeCanvas id={`qr-${link.id}`} value={scanUrl} size={95} level={"H"} className="w-[95px] h-[95px] sm:w-[105px] sm:h-[105px]" />
+                                </div>
+                                <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
+                                  <div className="flex items-center justify-between gap-2 mb-1">
+                                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Permanent Scan Link</span>
+                                    <span className="text-[10px] font-mono text-slate-400 shrink-0">ID: {link.id}</span>
+                                  </div>
+                                  <div className="text-[11px] sm:text-xs text-slate-700 font-mono break-all bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2 select-all flex items-center justify-between gap-2">
+                                    <span className="truncate">{scanUrl}</span>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => handleCopy(scanUrl)} 
+                                      className="text-slate-400 hover:text-blue-600 p-1 shrink-0 cursor-pointer"
+                                      title="Copy scan link"
+                                    >
+                                      <Copy size={13} />
+                                    </button>
+                                  </div>
+                                  <div className="text-xs text-slate-500 truncate">
+                                    <span className="font-semibold text-slate-700">Destination: </span>
+                                    {link.destinationUrl ? (
+                                      <span className="font-mono text-slate-800 text-[11px] break-all">{link.destinationUrl}</span>
+                                    ) : (
+                                      <span className="text-amber-600 font-medium">Not configured yet</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Edit drawer or Status footer */}
+                              {isEditing ? (
+                                <form onSubmit={handleUpdateLink} className="mt-3 pt-3 border-t border-slate-200 space-y-3">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Card / Business Name (Optional)
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editName}
+                                      onChange={(e) => setEditName(e.target.value)}
+                                      placeholder="e.g. Front Desk, Google Review Card, Hamza"
+                                      className="w-full px-3 py-2 text-base sm:text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                      Destination URL (Where scan will redirect)
+                                    </label>
+                                    <input
+                                      type="url"
+                                      value={editUrl}
+                                      onChange={(e) => setEditUrl(e.target.value)}
+                                      placeholder="https://..."
+                                      className="w-full px-3 py-2 text-base sm:text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+                                      required
+                                    />
+                                  </div>
+                                  <div className="flex gap-2 justify-end pt-1">
+                                    <button 
+                                      type="button" 
+                                      disabled={isUpdating}
+                                      onClick={() => { setEditingLink(null); setEditUrl(''); setEditName(''); }}
+                                      className="text-xs sm:text-sm px-3.5 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50 cursor-pointer"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button 
+                                      type="submit" 
+                                      disabled={isUpdating}
+                                      className="text-xs sm:text-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-all flex items-center gap-1.5 font-medium shadow-xs cursor-pointer active:scale-95"
+                                    >
+                                      {isUpdating ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : <><Save size={15} /> Save Changes</>}
+                                    </button>
+                                  </div>
+                                </form>
                               ) : (
-                                <span className="text-amber-600 font-medium">Not configured yet</span>
+                                <div className={`mt-2.5 pt-2.5 border-t border-slate-200/80 text-xs truncate flex items-center gap-1.5 ${isUnassigned ? 'text-amber-600' : 'text-emerald-700 font-medium'}`}>
+                                  {isUnassigned ? (
+                                    <>
+                                      <PlusCircle size={13} className="shrink-0 text-amber-500" />
+                                      <span className="truncate">Click the edit button above to set a destination URL.</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Check size={13} className="shrink-0 text-emerald-600" /> 
+                                      <span className="truncate">Redirects to: <strong className="text-slate-800 font-mono text-[11px] underline underline-offset-2">{link.destinationUrl}</strong></span>
+                                    </>
+                                  )}
+                                </div>
                               )}
                             </div>
-                          </div>
-                        </div>
-
-                        {isEditing ? (
-                          <form onSubmit={handleUpdateLink} className="mt-4 pt-4 border-t border-slate-200 space-y-3">
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                Card / Business Name (Optional)
-                              </label>
-                              <input
-                                type="text"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                                placeholder="e.g. Maaz Events, Google Review Card, Front Desk"
-                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                Destination URL (Where scan will redirect)
-                              </label>
-                              <input
-                                type="text"
-                                value={editUrl}
-                                onChange={(e) => setEditUrl(e.target.value)}
-                                placeholder="https://..."
-                                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                required
-                              />
-                            </div>
-                            <div className="flex gap-2 justify-end pt-1">
-                              <button 
-                                type="button" 
-                                disabled={isUpdating}
-                                onClick={() => { setEditingLink(null); setEditUrl(''); setEditName(''); }}
-                                className="text-sm px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium disabled:opacity-50"
-                              >
-                                Cancel
-                              </button>
-                              <button 
-                                type="submit"
-                                disabled={isUpdating}
-                                className="text-sm px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-colors flex items-center gap-2 font-medium shadow-xs"
-                              >
-                                {isUpdating ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Changes</>}
-                              </button>
-                            </div>
-                          </form>
-                        ) : (
-                          <div className={`mt-3 pt-3 border-t border-slate-200 text-xs truncate flex items-center gap-1.5 ${isUnassigned ? 'text-amber-600' : 'text-emerald-700 font-medium'}`}>
-                            {isUnassigned ? (
-                              <>
-                                <PlusCircle size={13} className="shrink-0 text-amber-500" />
-                                Please click the edit icon above to set a destination URL.
-                              </>
-                            ) : (
-                              <>
-                                <Check size={13} className="shrink-0 text-emerald-600" /> 
-                                <span>Redirects to: <strong className="text-slate-800 font-mono text-[11px] underline underline-offset-2">{link.destinationUrl}</strong></span>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                          );
+                        })}
+                      </>
                     );
-                  })}
-                </>
-              );
-            })()}
-              </div>
+                  })()}
+                </div>
               )}
             </div>
           </motion.div>
