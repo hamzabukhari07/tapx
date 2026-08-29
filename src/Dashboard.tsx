@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Copy, Check, MapPin, Link as LinkIcon, Loader2, QrCode, Download, Save, List, Edit2, Trash2, PlusCircle } from 'lucide-react';
+import { Copy, Check, MapPin, Link as LinkIcon, Loader2, QrCode, Download, Save, List, Edit2, Trash2, PlusCircle, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeCanvas } from 'qrcode.react';
 
@@ -21,6 +21,7 @@ interface QrLink {
   id: string;
   destinationUrl: string;
   businessName: string;
+  sequenceNumber: number;
 }
 
 export default function Dashboard({ user }: DashboardProps) {
@@ -40,10 +41,20 @@ export default function Dashboard({ user }: DashboardProps) {
   const [dynamicLinkUrl, setDynamicLinkUrl] = useState('');
   const [currentBusinessName, setCurrentBusinessName] = useState('');
   const [copied, setCopied] = useState(false);
-  
+
+  // Bulk Generate State
+  const [bulkCount, setBulkCount] = useState('');
+  const [isBulkCreating, setIsBulkCreating] = useState(false);
+  const [bulkResults, setBulkResults] = useState<QrLink[]>([]);
+  const [bulkError, setBulkError] = useState('');
+  const [bulkCopiedId, setBulkCopiedId] = useState('');
+
   // Saved Links State
   const [savedLinks, setSavedLinks] = useState<QrLink[]>([]);
   const [isLoadingLinks, setIsLoadingLinks] = useState(true);
+
+  // Manage Tab Filter State
+  const [manageTab, setManageTab] = useState<'all' | 'active' | 'inactive'>('all');
 
   // Edit State
   const [editingLink, setEditingLink] = useState<QrLink | null>(null);
@@ -132,6 +143,40 @@ export default function Dashboard({ user }: DashboardProps) {
       alert(err?.message || 'Failed to create dynamic QR code.');
     } finally {
       setIsCreatingQr(false);
+    }
+  };
+
+  const handleBulkGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const num = Math.floor(Number(bulkCount));
+    if (!Number.isFinite(num) || num <= 0 || num > 500) {
+      setBulkError('Enter a number between 1 and 500.');
+      return;
+    }
+
+    setIsBulkCreating(true);
+    setBulkError('');
+    setBulkResults([]);
+
+    try {
+      const response = await fetch('/api/bulk-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: num })
+      });
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.success) {
+        setBulkResults(data.links || []);
+        setBulkCount('');
+        fetchLinks();
+      } else {
+        setBulkError(data?.error || 'Failed to bulk generate QR codes.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setBulkError(err?.message || 'Failed to bulk generate QR codes.');
+    } finally {
+      setIsBulkCreating(false);
     }
   };
 
@@ -429,6 +474,116 @@ export default function Dashboard({ user }: DashboardProps) {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              <div className="my-8 flex items-center gap-3">
+                <div className="flex-1 h-px bg-slate-200"></div>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bulk Generate</span>
+                <div className="flex-1 h-px bg-slate-200"></div>
+              </div>
+
+              <form onSubmit={handleBulkGenerate} className="space-y-5">
+                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                      <Layers size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-800">Generate Multiple QR Codes</h3>
+                      <p className="text-slate-500 text-sm mt-0.5">
+                        Enter how many QR codes you need. Each one gets a permanent sequence number (0, 1, 2, &hellip;) that never changes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    How many QR codes to generate?
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="flex gap-2 flex-1">
+                      {[5, 10, 20, 50].map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => setBulkCount(String(n))}
+                          className={`flex-1 py-2.5 text-sm font-semibold rounded-lg border transition-colors ${
+                            bulkCount === String(n)
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600'
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="number"
+                      min={1}
+                      max={500}
+                      value={bulkCount}
+                      onChange={(e) => setBulkCount(e.target.value)}
+                      placeholder="N"
+                      className="w-20 px-3 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-center font-semibold"
+                    />
+                  </div>
+                  {bulkError && (
+                    <p className="text-red-500 text-xs mt-2">{bulkError}</p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isBulkCreating || !bulkCount}
+                  className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {isBulkCreating ? <><Loader2 size={20} className="animate-spin" /> Generating...</> : <><Layers size={20} /> Generate {bulkCount ? `${bulkCount} QR Codes` : 'QR Codes'}</>}
+                </button>
+              </form>
+
+              <AnimatePresence>
+                {bulkResults.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-8 pt-8 border-t border-slate-100"
+                  >
+                    <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl mb-6 text-sm font-medium border border-emerald-100 flex gap-2">
+                      <Check size={20} className="shrink-0 mt-0.5" />
+                      <div>
+                        Successfully generated {bulkResults.length} QR codes with sequence numbers #{bulkResults[0]?.sequenceNumber} &ndash; #{bulkResults[bulkResults.length - 1]?.sequenceNumber}. Find them in the Manage Links tab.
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {bulkResults.map((link) => {
+                        const scanUrl = `${window.location.origin}/scan/${link.id}`;
+                        const seq = link.sequenceNumber;
+                        const seqLabel = String(seq).padStart(2, '0');
+                        return (
+                          <div key={link.id} className="border border-slate-200 rounded-xl p-3 bg-slate-50 flex flex-col items-center gap-2">
+                            <span className="bg-slate-900 text-white font-mono text-xs font-bold px-2 py-0.5 rounded-md w-full text-center">
+                              #{seqLabel}
+                            </span>
+                            <div className="bg-white p-2 rounded-lg border border-slate-100">
+                              <QRCodeCanvas id={`bulk-qr-${link.id}`} value={scanUrl} size={90} level={"H"} />
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-400 truncate w-full text-center" title={scanUrl}>
+                              {scanUrl}
+                            </span>
+                            <button
+                              onClick={() => { handleCopy(scanUrl); setBulkCopiedId(link.id); }}
+                              className="w-full py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors flex items-center justify-center gap-1"
+                            >
+                              {bulkCopiedId === link.id ? <><Check size={12} className="text-emerald-500" /> Copied</> : <><Copy size={12} /> Copy</>}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
@@ -441,10 +596,39 @@ export default function Dashboard({ user }: DashboardProps) {
             className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
           >
             <div className="p-6 md:p-8">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                   <List size={22} className="text-slate-400" /> My Links
                 </h2>
+              </div>
+
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-lg mb-6">
+                <button
+                  onClick={() => setManageTab('all')}
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
+                    manageTab === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  All <span className="text-xs text-slate-400">{savedLinks.length}</span>
+                </button>
+                <button
+                  onClick={() => setManageTab('active')}
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
+                    manageTab === 'active' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${manageTab === 'active' ? 'bg-white' : 'bg-emerald-500'}`}></span>
+                  Active <span className="text-xs opacity-70">{savedLinks.filter(l => l.destinationUrl && l.destinationUrl.trim()).length}</span>
+                </button>
+                <button
+                  onClick={() => setManageTab('inactive')}
+                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${
+                    manageTab === 'inactive' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${manageTab === 'inactive' ? 'bg-white' : 'bg-amber-500'}`}></span>
+                  Non-Active <span className="text-xs opacity-70">{savedLinks.filter(l => !l.destinationUrl || !l.destinationUrl.trim()).length}</span>
+                </button>
               </div>
               
               {isLoadingLinks ? (
@@ -457,11 +641,34 @@ export default function Dashboard({ user }: DashboardProps) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {savedLinks.map((link, index) => {
-                    const scanUrl = `${window.location.origin}/scan/${link.id}`;
-                    const isEditing = editingLink?.id === link.id;
-                    const isUnassigned = !link.destinationUrl || !link.destinationUrl.trim();
-                    const cardNumber = String(index + 1).padStart(2, '0');
+                  {(() => {
+                    const filteredLinks = savedLinks.filter((link) => {
+                      const hasDest = !!link.destinationUrl && !!link.destinationUrl.trim();
+                      if (manageTab === 'active') return hasDest;
+                      if (manageTab === 'inactive') return !hasDest;
+                      return true;
+                    });
+                    if (filteredLinks.length === 0) {
+                      return (
+                        <div className="py-12 text-center text-slate-500 text-sm bg-slate-50 rounded-xl border border-slate-100">
+                          {manageTab === 'active'
+                            ? "No active QR codes yet. Assign a destination to activate them."
+                            : manageTab === 'inactive'
+                            ? "No unassigned QR codes. All links are active."
+                            : "You haven't created any dynamic QR codes yet."}
+                        </div>
+                      );
+                    }
+                    return (
+                      <>
+                        {filteredLinks.map((link) => {
+                          const scanUrl = `${window.location.origin}/scan/${link.id}`;
+                          const isEditing = editingLink?.id === link.id;
+                          const isUnassigned = !link.destinationUrl || !link.destinationUrl.trim();
+                          const cardSeq = (link.sequenceNumber !== undefined && link.sequenceNumber !== null)
+                            ? link.sequenceNumber
+                            : savedLinks.findIndex((l) => l.id === link.id);
+                          const cardNumber = String(cardSeq >= 0 ? cardSeq : 0).padStart(2, '0');
 
                     let displayName = link.businessName;
                     if (!displayName || displayName === 'Unassigned QR Code') {
@@ -627,7 +834,10 @@ export default function Dashboard({ user }: DashboardProps) {
                       </div>
                     );
                   })}
-                </div>
+                </>
+              );
+            })()}
+              </div>
               )}
             </div>
           </motion.div>

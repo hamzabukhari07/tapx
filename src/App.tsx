@@ -13,6 +13,7 @@ function SetupQr({ user }: { user: AdminUser }) {
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [name, setName] = useState('');
+  const [seqNumber, setSeqNumber] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -25,6 +26,9 @@ function SetupQr({ user }: { user: AdminUser }) {
         const data = await response.json();
         if (response.ok && data.link) {
           setUrl(data.link.destinationUrl || '');
+          if (data.link.sequenceNumber !== undefined && data.link.sequenceNumber !== null) {
+            setSeqNumber(data.link.sequenceNumber);
+          }
           const existingName = data.link.businessName;
           setName(existingName === 'Unassigned QR Code' ? '' : existingName || '');
         } else {
@@ -101,7 +105,14 @@ function SetupQr({ user }: { user: AdminUser }) {
             <QrCode size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Assign QR Code</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-slate-800">Assign QR Code</h2>
+              {seqNumber !== null && (
+                <span className="bg-blue-600 text-white font-mono text-xs font-bold px-2 py-0.5 rounded-md shadow-xs">
+                  #{String(seqNumber).padStart(2, '0')}
+                </span>
+              )}
+            </div>
             <p className="text-slate-500 text-sm">Set the destination for this QR code.</p>
           </div>
         </div>

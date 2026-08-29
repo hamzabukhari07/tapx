@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
-import { listQrLinks, getQrLink, insertQrLink, upsertQrLink, deleteQrLink } from './api/_lib/db.js';
+import { listQrLinks, getQrLink, insertQrLink, upsertQrLink, deleteQrLink, bulkInsertQrLinks } from './api/_lib/db.js';
 import { extractReviewLink } from './api/_lib/extract-link.js';
 import { scanPage, isSafeRedirectUrl } from './api/_lib/scan-page.js';
 
@@ -51,6 +51,22 @@ async function startServer() {
     }
 
     return res.status(401).json({ error: 'Invalid username or password.' });
+  });
+
+  // Bulk Generate QR Links Endpoint
+  app.post('/api/bulk-generate', async (req, res) => {
+    try {
+      const { count } = req.body || {};
+      const num = Math.floor(Number(count));
+      if (!Number.isFinite(num) || num <= 0 || num > 500) {
+        return res.status(400).json({ error: 'Count must be a number between 1 and 500.' });
+      }
+      const links = await bulkInsertQrLinks(num);
+      res.json({ success: true, created: links.length, links });
+    } catch (error) {
+      console.error('Bulk generate error:', error);
+      res.status(500).json({ error: 'Failed to bulk generate QR links.' });
+    }
   });
 
   // QR Links API Endpoints (Admin backed)
