@@ -426,11 +426,11 @@ export default function Dashboard({ user }: DashboardProps) {
                   </label>
                   <div className="relative">
                     <input
-                      type="url"
+                      type="text"
                       value={mapLink}
                       onChange={(e) => setMapLink(e.target.value)}
-                      placeholder="https://maps.app.goo.gl/..."
-                      className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 pl-9 sm:pl-10 text-base sm:text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-slate-50 focus:bg-white"
+                      placeholder="Paste link or mobile share text (e.g. https://maps.app.goo.gl/...)"
+                      className="w-full px-4 py-3 pl-10 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                       required
                     />
                     <LinkIcon size={16} className="absolute left-3 top-3.5 text-slate-400" />
